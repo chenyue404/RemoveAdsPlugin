@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">去广告（微博国际）</string>
+    <string name="xposed_description">去广告</string>
+</resources>
