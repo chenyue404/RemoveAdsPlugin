@@ -2,6 +2,7 @@ package com.chenyue.cancelAds.hook
 
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -13,6 +14,7 @@ class WeiboHook : IXposedHookLoadPackage {
 
     //微博国际版
     private val PACKAGE_NAME = "com.weico.international"
+    private val TAG = "微博-hook-"
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
 
@@ -23,6 +25,8 @@ class WeiboHook : IXposedHookLoadPackage {
             return
         }
 
+        XposedBridge.log(TAG)
+
         val StatusClass = XposedHelpers.findClass("com.weico.international.model.sina.Status", classLoader);
         findAndHookMethod("com.weico.international.utility.KotlinExtendKt",
             classLoader,
@@ -30,6 +34,7 @@ class WeiboHook : IXposedHookLoadPackage {
             StatusClass,
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
+                    XposedBridge.log(TAG + "isWeiboUVEAd")
                     param.result = false
                 }
             })
@@ -41,6 +46,7 @@ class WeiboHook : IXposedHookLoadPackage {
             PageInfo,
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
+                    XposedBridge.log(TAG + "findUVEAd")
                     param.result = null
                 }
             })
@@ -77,6 +83,7 @@ class WeiboHook : IXposedHookLoadPackage {
             "isReady",
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
+                    XposedBridge.log(TAG + "isReady")
                     param.result = false
                 }
             })
