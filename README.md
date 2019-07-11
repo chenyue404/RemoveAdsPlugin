@@ -1,2 +1,2 @@
 # RemoveAdsPlugin
-去除微博国际版的timeline广告
+去除微博国际版的timeline广告和开屏广告
