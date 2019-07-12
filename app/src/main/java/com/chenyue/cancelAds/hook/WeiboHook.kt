@@ -51,40 +51,20 @@ class WeiboHook : IXposedHookLoadPackage {
                 }
             })
 
-//        findAndHookMethod("com.weico.international.activity.NewSplashActivity",
-//            classLoader,
-//            "requestSplashAd",
-//            object : XC_MethodHook() {
-//                override fun beforeHookedMethod(param: MethodHookParam) {
-//                    Log.e("cancelAds", "requestSplashAd")
-//                    XposedHelpers.callMethod(
-//                        "com.weico.international.activity.NewSplashActivity",
-//                        "next"
-//                    );
-//                    param.result = null
-//                }
-//            })
-//
-//        val FlashAdBuilder = XposedHelpers.findClass("com.weibo.mobileads.controller.Builder.FlashAdBuilder", classLoader);
-//        findAndHookMethod("com.weibo.mobileads.controller.AdSdk",
-//            classLoader,
-//            "initFlashAd",
-//            FlashAdBuilder,
-//            object : XC_MethodHook() {
-//                override fun beforeHookedMethod(param: MethodHookParam) {
-//                    Log.e("cancelAds", "initFlashAd")
-//                    param.result = null
-//                }
-//            })
-
-
-        findAndHookMethod("com.weibo.mobileads.view.FlashAd",
+        findAndHookMethod(
+            "com.weico.international.activity.LogoActivity",
             classLoader,
-            "isReady",
+            "doWhatNext",
             object : XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam) {
-                    XposedBridge.log(TAG + "isReady")
-                    param.result = false
+                override fun afterHookedMethod(param: MethodHookParam?) {
+                    if (param != null) {
+                        XposedBridge.log(TAG + "doWhatNext-" + param.result)
+                        if (param.result.equals("GDTAD")
+                            || param.result.equals("sinaAD")
+                        ) {
+                            param.result = "main"
+                        }
+                    }
                 }
             })
 
