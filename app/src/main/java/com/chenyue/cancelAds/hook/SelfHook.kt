@@ -1,7 +1,7 @@
 package com.chenyue.cancelAds.hook
 
 import de.robv.android.xposed.IXposedHookLoadPackage
-import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XC_MethodReplacement
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -22,13 +22,17 @@ class SelfHook : IXposedHookLoadPackage {
         XposedBridge.log(TAG)
 
         XposedHelpers.findAndHookMethod("com.chenyue.cancelAds.ui.MainActivity",
-                classLoader,
+            classLoader,
             "a",
-                object : XC_MethodHook() {
-                    override fun afterHookedMethod(param: MethodHookParam) {
-                        XposedBridge.log(TAG + "isActive")
-                        param.result = true
-                    }
-                })
+            object : XC_MethodReplacement() {
+                override fun replaceHookedMethod(param: MethodHookParam?): Any {
+                    XposedBridge.log(TAG + "isActive")
+                    return true
+                }
+//                    override fun afterHookedMethod(param: MethodHookParam) {
+//                        XposedBridge.log(TAG + "isActive")
+//                        param.result = true
+//                    }
+            })
     }
 }
