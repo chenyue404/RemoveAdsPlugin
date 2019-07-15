@@ -23,7 +23,7 @@ class SelfHook : IXposedHookLoadPackage {
 
         XposedHelpers.findAndHookMethod("com.chenyue.cancelAds.ui.MainActivity",
                 classLoader,
-                "isActive",
+            "a",
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
                         XposedBridge.log(TAG + "isActive")
