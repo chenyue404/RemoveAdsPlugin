@@ -1,5 +1,6 @@
 package com.chenyue.cancelAds
 
+import com.chenyue.cancelAds.hook.QQMusicHook
 import com.chenyue.cancelAds.hook.SelfHook
 import com.chenyue.cancelAds.hook.WeiboHook
 import de.robv.android.xposed.IXposedHookLoadPackage
@@ -21,10 +22,11 @@ object HookManager {
 
     init {
         registHookClass(
-                arrayListOf(
-                        WeiboHook(),
-                        SelfHook()
-                )
+            arrayListOf(
+                WeiboHook(),
+                QQMusicHook(),
+                SelfHook()
+            )
         )
     }
 }
