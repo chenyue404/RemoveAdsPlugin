@@ -38,5 +38,16 @@ class JdjrHook : IXposedHookLoadPackage {
             }
         )
 
+        findAndHookMethod(
+            "com.jd.jrapp.bm.licai.xjk.CofferHomeActivity201801",
+            classLoader,
+            "showUpdateDialog",
+            object : XC_MethodReplacement() {
+                override fun replaceHookedMethod(param: MethodHookParam?): Any {
+                    XposedBridge.log(TAG + "showUpdateDialog")
+                    return false
+                }
+            }
+        )
     }
 }
