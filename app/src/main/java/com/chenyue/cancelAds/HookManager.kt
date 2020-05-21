@@ -1,5 +1,6 @@
 package com.chenyue.cancelAds
 
+import com.chenyue.cancelAds.hook.CoolApkHook
 import com.chenyue.cancelAds.hook.JdjrHook
 import com.chenyue.cancelAds.hook.SelfHook
 import com.chenyue.cancelAds.hook.WeiboHook
@@ -25,7 +26,8 @@ object HookManager {
             arrayListOf(
                 WeiboHook(),
                 SelfHook(),
-                JdjrHook()
+                JdjrHook(),
+                CoolApkHook()
             )
         )
     }
