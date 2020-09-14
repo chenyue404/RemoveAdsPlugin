@@ -26,7 +26,7 @@ class WeiboHook : IXposedHookLoadPackage {
         XposedBridge.log(TAG)
 
         val StatusClass =
-            XposedHelpers.findClass("com.weico.international.model.sina.Status", classLoader);
+            XposedHelpers.findClass("com.weico.international.model.sina.Status", classLoader)
         findAndHookMethod("com.weico.international.utility.KotlinExtendKt",
             classLoader,
             "isWeiboUVEAd",
@@ -39,7 +39,7 @@ class WeiboHook : IXposedHookLoadPackage {
             })
 
         val PageInfo =
-            XposedHelpers.findClass("com.weico.international.model.sina.PageInfo", classLoader);
+            XposedHelpers.findClass("com.weico.international.model.sina.PageInfo", classLoader)
         findAndHookMethod("com.weico.international.utility.KotlinUtilKt",
             classLoader,
             "findUVEAd",
@@ -82,5 +82,18 @@ class WeiboHook : IXposedHookLoadPackage {
                 }
             }
         )
+
+        findAndHookMethod(
+            "com.weico.international.activity.LogoActivity",
+            classLoader,
+            "triggerPermission",
+            Boolean::class.java,
+            object : XC_MethodReplacement() {
+                override fun replaceHookedMethod(param: MethodHookParam): Any {
+                    XposedBridge.log(TAG + "triggerPermission")
+                    XposedHelpers.callMethod(param.thisObject, "initPermission")
+                    return true
+                }
+            })
     }
 }
