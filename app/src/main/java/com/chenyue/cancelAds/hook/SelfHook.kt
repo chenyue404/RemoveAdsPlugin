@@ -21,18 +21,32 @@ class SelfHook : IXposedHookLoadPackage {
 
         XposedBridge.log(TAG)
 
+        if (XposedHelpers.findMethodExactIfExists(
+                "com.chenyue.cancelAds.ui.MainActivity",
+                classLoader,
+                "a"
+            ) != null
+        ) {
+            XposedHelpers.findAndHookMethod("com.chenyue.cancelAds.ui.MainActivity",
+                classLoader,
+                "a",
+                object : XC_MethodReplacement() {
+                    override fun replaceHookedMethod(param: MethodHookParam?): Any {
+                        XposedBridge.log(TAG + "isActive")
+                        return true
+                    }
+                })
+        }
+
         XposedHelpers.findAndHookMethod("com.chenyue.cancelAds.ui.MainActivity",
             classLoader,
-            "a",
+            "isActive",
             object : XC_MethodReplacement() {
                 override fun replaceHookedMethod(param: MethodHookParam?): Any {
                     XposedBridge.log(TAG + "isActive")
+                    param?.result = true
                     return true
                 }
-//                    override fun afterHookedMethod(param: MethodHookParam) {
-//                        XposedBridge.log(TAG + "isActive")
-//                        param.result = true
-//                    }
             })
     }
 }

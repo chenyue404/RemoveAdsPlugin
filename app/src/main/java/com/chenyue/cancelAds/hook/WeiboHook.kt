@@ -4,6 +4,7 @@ import android.app.Activity
 import de.robv.android.xposed.*
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
 import de.robv.android.xposed.callbacks.XC_LoadPackage
+import java.net.URLDecoder
 
 /**
  * Created by chenyue404
@@ -93,6 +94,26 @@ class WeiboHook : IXposedHookLoadPackage {
                     XposedBridge.log(TAG + "triggerPermission")
                     XposedHelpers.callMethod(param.thisObject, "initPermission")
                     return true
+                }
+            })
+
+        findAndHookMethod(
+            "com.weico.international.activity.WebviewActivity",
+            classLoader,
+            "loadUrl",
+            String::class.java,
+            object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    var url = param.args[0] as String
+                    XposedBridge.log(TAG + url)
+                    val sinaUrl = "https://weibo.cn/sinaurl?u="
+                    if (url.startsWith(sinaUrl)) {
+                        url = url.substring(sinaUrl.length)
+                        url = URLDecoder.decode(url)
+                        XposedBridge.log(TAG + url)
+                        param.args[0] = url
+                    }
+                    super.beforeHookedMethod(param)
                 }
             })
     }
