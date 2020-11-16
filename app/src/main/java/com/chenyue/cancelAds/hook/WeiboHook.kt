@@ -1,6 +1,9 @@
 package com.chenyue.cancelAds.hook
 
 import android.app.Activity
+import android.app.AndroidAppHelper
+import android.content.Context
+import android.widget.Toast
 import de.robv.android.xposed.*
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -106,12 +109,68 @@ class WeiboHook : IXposedHookLoadPackage {
                 override fun beforeHookedMethod(param: MethodHookParam) {
                     var url = param.args[0] as String
                     XposedBridge.log(TAG + url)
-                    val sinaUrl = "https://weibo.cn/sinaurl?u="
-                    if (url.startsWith(sinaUrl)) {
-                        url = url.substring(sinaUrl.length)
+                    val sinaUrl = "://weibo.cn/sinaurl?u="
+                    if (url.contains(sinaUrl)) {
+                        url = url.substring(url.indexOf(sinaUrl) + sinaUrl.length, url.length)
                         url = URLDecoder.decode(url)
                         XposedBridge.log(TAG + url)
                         param.args[0] = url
+                    } else {
+                        Toast.makeText(
+                            AndroidAppHelper.currentApplication().applicationContext,
+                            "WebviewActivity-$url", Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    super.beforeHookedMethod(param)
+                }
+            })
+
+        findAndHookMethod(
+            "com.sina.wbs.webkit.WebView",
+            classLoader,
+            "loadUrl",
+            String::class.java,
+            object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    var url = param.args[0] as String
+                    XposedBridge.log(TAG + url)
+                    val sinaUrl = "://weibo.cn/sinaurl?u="
+                    if (url.contains(sinaUrl)) {
+                        url = url.substring(url.indexOf(sinaUrl) + sinaUrl.length, url.length)
+                        url = URLDecoder.decode(url)
+                        XposedBridge.log(TAG + url)
+                        param.args[0] = url
+                    } else {
+                        Toast.makeText(
+                            AndroidAppHelper.currentApplication().applicationContext,
+                            "WebView-$url", Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    super.beforeHookedMethod(param)
+                }
+            })
+
+        findAndHookMethod(
+            "com.weico.international.browser.BrowserManager",
+            classLoader,
+            "loadUrl",
+            Context::class.java,
+            String::class.java,
+            object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    var url = param.args[1] as String
+                    XposedBridge.log(TAG + url)
+                    val sinaUrl = "://weibo.cn/sinaurl?u="
+                    if (url.contains(sinaUrl)) {
+                        url = url.substring(url.indexOf(sinaUrl) + sinaUrl.length, url.length)
+                        url = URLDecoder.decode(url)
+                        XposedBridge.log(TAG + url)
+                        param.args[1] = url
+                    } else {
+                        Toast.makeText(
+                            AndroidAppHelper.currentApplication().applicationContext,
+                            "BrowserManager-$url", Toast.LENGTH_SHORT
+                        ).show()
                     }
                     super.beforeHookedMethod(param)
                 }
