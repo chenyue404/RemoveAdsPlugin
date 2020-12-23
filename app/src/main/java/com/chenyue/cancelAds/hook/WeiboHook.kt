@@ -175,5 +175,18 @@ class WeiboHook : IXposedHookLoadPackage {
                     super.beforeHookedMethod(param)
                 }
             })
+
+        findAndHookMethod("com.weico.international.activity.v4.Setting",
+            classLoader,
+            "loadBoolean",
+            String::class.java,
+            object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    if (param.args[0] as String == "BOOL_UVE_FEED_AD") {
+                        XposedBridge.log(TAG + "loadBoolean")
+                        param.result = false
+                    }
+                }
+            })
     }
 }
