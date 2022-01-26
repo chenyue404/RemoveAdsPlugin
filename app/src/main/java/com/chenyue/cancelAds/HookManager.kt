@@ -1,9 +1,6 @@
 package com.chenyue.cancelAds
 
-import com.chenyue.cancelAds.hook.CoolApkHook
-import com.chenyue.cancelAds.hook.JdjrHook
-import com.chenyue.cancelAds.hook.SelfHook
-import com.chenyue.cancelAds.hook.WeiboHook
+import com.chenyue.cancelAds.hook.*
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
@@ -27,7 +24,8 @@ object HookManager {
                 WeiboHook(),
                 SelfHook(),
                 JdjrHook(),
-                CoolApkHook()
+                CoolApkHook(),
+                FeimaoHook()
             )
         )
     }
