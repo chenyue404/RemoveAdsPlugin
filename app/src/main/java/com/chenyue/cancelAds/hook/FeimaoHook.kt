@@ -1,9 +1,7 @@
 package com.chenyue.cancelAds.hook
 
-import de.robv.android.xposed.IXposedHookLoadPackage
-import de.robv.android.xposed.XC_MethodReplacement
-import de.robv.android.xposed.XposedBridge
-import de.robv.android.xposed.XposedHelpers
+import android.content.Intent
+import de.robv.android.xposed.*
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
 /**
@@ -30,7 +28,6 @@ class FeimaoHook : IXposedHookLoadPackage {
             "initData",
             object : XC_MethodReplacement() {
                 override fun replaceHookedMethod(param: MethodHookParam?): Any? {
-                    XposedBridge.log(TAG + "com.feemoo.activity.main.MainActivity#initData")
                     return null
                 }
             }
@@ -42,7 +39,6 @@ class FeimaoHook : IXposedHookLoadPackage {
             "loadSplashAd",
             object : XC_MethodReplacement() {
                 override fun replaceHookedMethod(param: MethodHookParam?): Any? {
-                    XposedBridge.log(TAG + "com.feemoo.activity.login.SplashActivity#loadSplashAd")
                     return null
                 }
             }
@@ -54,7 +50,6 @@ class FeimaoHook : IXposedHookLoadPackage {
             "initGuide",
             object : XC_MethodReplacement() {
                 override fun replaceHookedMethod(param: MethodHookParam): Any? {
-                    XposedBridge.log(TAG + "com.feemoo.activity.login.SplashActivity#initGuide")
                     XposedHelpers.callMethod(param.thisObject, "goToMainActivity")
                     return null
                 }
@@ -67,7 +62,6 @@ class FeimaoHook : IXposedHookLoadPackage {
             "cx",
             object : XC_MethodReplacement() {
                 override fun replaceHookedMethod(param: MethodHookParam?): Any {
-                    XposedBridge.log(TAG + "com.mob.tools.utils.DeviceHelper#cx")
                     return false
                 }
             }
@@ -80,8 +74,24 @@ class FeimaoHook : IXposedHookLoadPackage {
             XposedHelpers.findClass("okhttp3.HttpUrl", classLoader),
             object : XC_MethodReplacement() {
                 override fun replaceHookedMethod(param: MethodHookParam?): Any {
-                    XposedBridge.log(TAG + "okhttp3.internal.connection.RealConnection#supportsUrl")
                     return true
+                }
+            }
+        )
+
+        XposedHelpers.findAndHookMethod(
+            "com.feemoo.base.BaseActivity",
+            classLoader,
+            "startActivity",
+            Intent::class.java,
+            object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    val intent: Intent = param.args[0] as Intent
+                    val className = intent.component?.className
+                    if (className?.contains("VipOverdueActivity", true) == true) {
+                        param.result = true
+                        return
+                    }
                 }
             }
         )
