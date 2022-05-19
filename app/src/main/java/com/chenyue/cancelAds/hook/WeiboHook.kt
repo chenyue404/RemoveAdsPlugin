@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AndroidAppHelper
 import android.content.Context
 import android.widget.Toast
+import com.chenyue.cancelAds.BuildConfig
 import de.robv.android.xposed.*
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -37,7 +38,7 @@ class WeiboHook : IXposedHookLoadPackage {
             StatusClass,
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
-                    XposedBridge.log(TAG + "isWeiboUVEAd")
+                    log("isWeiboUVEAd")
                     param.result = false
                 }
             })
@@ -50,7 +51,7 @@ class WeiboHook : IXposedHookLoadPackage {
             PageInfo,
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
-                    XposedBridge.log(TAG + "findUVEAd")
+                    log("findUVEAd")
                     param.result = null
                 }
             })
@@ -62,7 +63,7 @@ class WeiboHook : IXposedHookLoadPackage {
             object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam?) {
                     if (param != null) {
-                        XposedBridge.log(TAG + "doWhatNext-" + param.result)
+                        log("doWhatNext-" + param.result)
                         if (param.result.equals("GDTAD")
                             || param.result.equals("sinaAD")
                         ) {
@@ -72,20 +73,25 @@ class WeiboHook : IXposedHookLoadPackage {
                 }
             })
 
-        findAndHookMethod(
-            "com.weico.international.manager.ProcessMonitor",
-            classLoader,
-            "displayAd",
-            Long::class.java,
-            Activity::class.java,
-            Boolean::class.java,
-            object : XC_MethodReplacement() {
-                override fun replaceHookedMethod(param: MethodHookParam?): Any {
-                    XposedBridge.log(TAG + "displayAd")
-                    return true
+        try {
+            findAndHookMethod(
+                "com.weico.international.manager.ProcessMonitor",
+                classLoader,
+                "displayAd",
+                Long::class.java,
+                Activity::class.java,
+                Boolean::class.java,
+                object : XC_MethodReplacement() {
+                    override fun replaceHookedMethod(param: MethodHookParam?): Any {
+                        log("displayAd")
+                        return true
+                    }
                 }
-            }
-        )
+            )
+        } catch (e: NoSuchMethodError) {
+            log("NoSuchMethodError--com.weico.international.manager.ProcessMonitor")
+        }
+
 
         findAndHookMethod(
             "com.weico.international.activity.LogoActivity",
@@ -94,7 +100,7 @@ class WeiboHook : IXposedHookLoadPackage {
             Boolean::class.java,
             object : XC_MethodReplacement() {
                 override fun replaceHookedMethod(param: MethodHookParam): Any {
-                    XposedBridge.log(TAG + "triggerPermission")
+                    log("triggerPermission")
                     XposedHelpers.callMethod(param.thisObject, "initPermission")
                     return true
                 }
@@ -108,12 +114,12 @@ class WeiboHook : IXposedHookLoadPackage {
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
                     var url = param.args[0] as String
-                    XposedBridge.log(TAG + url)
+                    log(url)
                     val sinaUrl = "://weibo.cn/sinaurl?u="
                     if (url.contains(sinaUrl)) {
                         url = url.substring(url.indexOf(sinaUrl) + sinaUrl.length, url.length)
                         url = URLDecoder.decode(url)
-                        XposedBridge.log(TAG + url)
+                        log(url)
                         param.args[0] = url
                     } else {
                         Toast.makeText(
@@ -133,12 +139,12 @@ class WeiboHook : IXposedHookLoadPackage {
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
                     var url = param.args[0] as String
-                    XposedBridge.log(TAG + url)
+                    log(url)
                     val sinaUrl = "://weibo.cn/sinaurl?u="
                     if (url.contains(sinaUrl)) {
                         url = url.substring(url.indexOf(sinaUrl) + sinaUrl.length, url.length)
                         url = URLDecoder.decode(url)
-                        XposedBridge.log(TAG + url)
+                        log(url)
                         param.args[0] = url
                     } else {
                         Toast.makeText(
@@ -159,12 +165,12 @@ class WeiboHook : IXposedHookLoadPackage {
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
                     var url = param.args[1] as String
-                    XposedBridge.log(TAG + url)
+                    log(url)
                     val sinaUrl = "://weibo.cn/sinaurl?u="
                     if (url.contains(sinaUrl)) {
                         url = url.substring(url.indexOf(sinaUrl) + sinaUrl.length, url.length)
                         url = URLDecoder.decode(url)
-                        XposedBridge.log(TAG + url)
+                        log(url)
                         param.args[1] = url
                     } else {
                         Toast.makeText(
@@ -182,9 +188,11 @@ class WeiboHook : IXposedHookLoadPackage {
             String::class.java,
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
-                    if (param.args[0] as String == "BOOL_UVE_FEED_AD") {
-                        XposedBridge.log(TAG + "loadBoolean")
-                        param.result = false
+                    val key = param.args[0] as String
+                    log("loadBoolean--$key")
+                    when {
+                        key == "BOOL_UVE_FEED_AD" -> param.result = false
+                        key.startsWith("BOOL_AD_ACTIVITY_BLOCK_") -> param.result = true
                     }
                 }
             })
@@ -196,7 +204,9 @@ class WeiboHook : IXposedHookLoadPackage {
             String::class.java,
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
-                    when (param.args[0] as String) {
+                    val key = param.args[0] as String
+                    log("loadInt--$key")
+                    when (key) {
                         "ad_interval" -> param.result = Int.MAX_VALUE
                         "display_ad" -> param.result = 0
                     }
@@ -211,7 +221,9 @@ class WeiboHook : IXposedHookLoadPackage {
             String::class.java,
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
-                    when (param.args[0] as String) {
+                    val key = param.args[0] as String
+                    log("loadStringSet--$key")
+                    when (key) {
                         "CYT_DAYS" -> param.result = setOf<String>()
                     }
                 }
@@ -225,11 +237,19 @@ class WeiboHook : IXposedHookLoadPackage {
             String::class.java,
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
-                    when (param.args[0] as String) {
+                    val key = param.args[0] as String
+                    log("loadString--$key")
+                    when (key) {
                         "video_ad" -> param.result = ""
                     }
                 }
             }
         )
+    }
+
+    private fun log(log: String) {
+        if (BuildConfig.DEBUG) {
+            XposedBridge.log("$TAG-$log")
+        }
     }
 }
