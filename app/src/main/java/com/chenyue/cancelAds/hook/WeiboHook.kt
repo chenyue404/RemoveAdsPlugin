@@ -188,5 +188,48 @@ class WeiboHook : IXposedHookLoadPackage {
                     }
                 }
             })
+
+        findAndHookMethod(
+            "com.weico.international.activity.v4.Setting",
+            classLoader,
+            "loadInt",
+            String::class.java,
+            object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    when (param.args[0] as String) {
+                        "ad_interval" -> param.result = Int.MAX_VALUE
+                        "display_ad" -> param.result = 0
+                    }
+                }
+            }
+        )
+
+        findAndHookMethod(
+            "com.weico.international.activity.v4.Setting",
+            classLoader,
+            "loadStringSet",
+            String::class.java,
+            object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    when (param.args[0] as String) {
+                        "CYT_DAYS" -> param.result = setOf<String>()
+                    }
+                }
+            }
+        )
+
+        findAndHookMethod(
+            "com.weico.international.activity.v4.Setting",
+            classLoader,
+            "loadString",
+            String::class.java,
+            object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    when (param.args[0] as String) {
+                        "video_ad" -> param.result = ""
+                    }
+                }
+            }
+        )
     }
 }
