@@ -92,7 +92,6 @@ class WeiboHook : IXposedHookLoadPackage {
             log("NoSuchMethodError--com.weico.international.manager.ProcessMonitor")
         }
 
-
         findAndHookMethod(
             "com.weico.international.activity.LogoActivity",
             classLoader,
@@ -242,6 +241,18 @@ class WeiboHook : IXposedHookLoadPackage {
                     when (key) {
                         "video_ad" -> param.result = ""
                     }
+                }
+            }
+        )
+
+        findAndHookMethod(
+            "com.weico.international.api.RxApiKt", classLoader,
+            "queryUveAdRequest\$lambda-178",
+            XposedHelpers.findClass("java.util.Map", classLoader),
+            object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    log("queryUveAdRequest")
+                    param.result = ""
                 }
             }
         )

@@ -3,10 +3,12 @@ package com.chenyue.cancelAds.ui
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
+import android.widget.TextView
 import com.chenyue.cancelAds.R
-import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : Activity() {
+
+    private val tv by lazy { findViewById<TextView>(R.id.tv) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
