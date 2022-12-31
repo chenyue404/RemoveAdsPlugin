@@ -3,10 +3,12 @@ package com.chenyue.cancelAds.hook
 import android.app.Activity
 import android.app.AndroidAppHelper
 import android.content.Context
+import android.os.Bundle
 import android.widget.Toast
 import com.chenyue.cancelAds.BuildConfig
+import com.chenyue.cancelAds.ui.MainActivity
 import de.robv.android.xposed.*
-import de.robv.android.xposed.XposedHelpers.findAndHookMethod
+import de.robv.android.xposed.XposedHelpers.*
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import java.net.URLDecoder
 
@@ -18,6 +20,13 @@ class WeiboHook : IXposedHookLoadPackage {
     //微博国际版
     private val PACKAGE_NAME = "com.weico.international"
     private val TAG = "微博-hook-"
+
+    private val sp by lazy {
+        XSharedPreferences(
+            BuildConfig.APPLICATION_ID,
+            MainActivity.PREF_NAME
+        )
+    }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
 
@@ -31,7 +40,7 @@ class WeiboHook : IXposedHookLoadPackage {
         XposedBridge.log(TAG)
 
         val StatusClass =
-            XposedHelpers.findClass("com.weico.international.model.sina.Status", classLoader)
+            findClass("com.weico.international.model.sina.Status", classLoader)
         findAndHookMethod("com.weico.international.utility.KotlinExtendKt",
             classLoader,
             "isWeiboUVEAd",
@@ -44,7 +53,7 @@ class WeiboHook : IXposedHookLoadPackage {
             })
 
         val PageInfo =
-            XposedHelpers.findClass("com.weico.international.model.sina.PageInfo", classLoader)
+            findClass("com.weico.international.model.sina.PageInfo", classLoader)
         findAndHookMethod("com.weico.international.utility.KotlinUtilKt",
             classLoader,
             "findUVEAd",
@@ -248,11 +257,35 @@ class WeiboHook : IXposedHookLoadPackage {
         findAndHookMethod(
             "com.weico.international.api.RxApiKt", classLoader,
             "queryUveAdRequest\$lambda-178",
-            XposedHelpers.findClass("java.util.Map", classLoader),
+            findClass("java.util.Map", classLoader),
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
                     log("queryUveAdRequest")
                     param.result = ""
+                }
+            }
+        )
+
+        findAndHookMethod(
+            "com.weico.international.video.AbsPlayer", classLoader,
+            "setUp",
+            Bundle::class.java,
+            findClass("com.weico.international.model.sina.Status", classLoader),
+            object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    log("com.weico.international.video.AbsPlayer#setUp")
+                    sp.reload()
+                    val newSpeed = sp.getFloat(MainActivity.KEY_VIDEO_SPEED, 1.0f)
+                    setFloatField(param.thisObject, "mSpeed", newSpeed)
+                }
+            }
+        )
+
+        findAndHookMethod("com.weico.international.data.VideoModalOTO", classLoader,
+            "getDownloadAble",
+            object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    param.result = true
                 }
             }
         )

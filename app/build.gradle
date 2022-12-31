@@ -7,18 +7,34 @@ android {
         applicationId "com.chenyue.cancelAds"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 15
-        versionName "1.2.0"
+        versionCode 16
+        versionName "1.3.0"
     }
+
+    File certificationConfFile = file("certification.properties")
+    Properties certificationConf = new Properties()
+    certificationConf.load(new FileInputStream(certificationConfFile))
+
+    signingConfigs {
+        my {
+            storeFile file(certificationConf['storeFile'])
+            storePassword certificationConf['storePassword']
+            keyAlias certificationConf['keyAlias']
+            keyPassword certificationConf['keyPassword']
+        }
+    }
+
     buildTypes {
         debug {
             minifyEnabled false
             shrinkResources false
+            signingConfig signingConfigs.my
         }
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.my
         }
     }
 }
