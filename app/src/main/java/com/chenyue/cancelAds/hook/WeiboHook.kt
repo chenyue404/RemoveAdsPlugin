@@ -75,6 +75,7 @@ class WeiboHook : IXposedHookLoadPackage {
                         log("doWhatNext-" + param.result)
                         if (param.result.equals("GDTAD")
                             || param.result.equals("sinaAD")
+                            || param.result.equals("AD")
                         ) {
                             param.result = "main"
                         }
@@ -114,30 +115,51 @@ class WeiboHook : IXposedHookLoadPackage {
                 }
             })
 
-        findAndHookMethod(
-            "com.weico.international.activity.WebviewActivity",
-            classLoader,
-            "loadUrl",
-            String::class.java,
-            object : XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam) {
-                    var url = param.args[0] as String
+        val webviewHook = object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                var url = param.args[0] as String
+                log(url)
+                val sinaUrl = "://weibo.cn/sinaurl?u="
+                if (url.contains(sinaUrl)) {
+                    url = url.substring(url.indexOf(sinaUrl) + sinaUrl.length, url.length)
+                    url = URLDecoder.decode(url)
                     log(url)
-                    val sinaUrl = "://weibo.cn/sinaurl?u="
-                    if (url.contains(sinaUrl)) {
-                        url = url.substring(url.indexOf(sinaUrl) + sinaUrl.length, url.length)
-                        url = URLDecoder.decode(url)
-                        log(url)
-                        param.args[0] = url
-                    } else {
-                        Toast.makeText(
-                            AndroidAppHelper.currentApplication().applicationContext,
-                            "WebviewActivity-$url", Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    super.beforeHookedMethod(param)
+                    param.args[0] = url
+                } else {
+                    Toast.makeText(
+                        AndroidAppHelper.currentApplication().applicationContext,
+                        "WebviewActivity-$url", Toast.LENGTH_SHORT
+                    ).show()
                 }
-            })
+                super.beforeHookedMethod(param)
+            }
+        }
+        try {
+            findAndHookMethod(
+                "com.weico.international.activity.WebviewActivity",
+                classLoader,
+                "loadUrl",
+                String::class.java,
+                webviewHook
+            )
+        } catch (e: NoSuchMethodError) {
+            log("NoSuchMethodError--com.weico.international.activity.WebviewActivity.loadUrl")
+        } catch (e: ClassNotFoundError) {
+            log("ClassNotFoundError--com.weico.international.activity.WebviewActivity.loadUrl")
+        }
+        try {
+            findAndHookMethod(
+                "com.weico.international.activity.WebviewSimpleActivity",
+                classLoader,
+                "loadUrl",
+                String::class.java,
+                webviewHook
+            )
+        } catch (e: NoSuchMethodError) {
+            log("NoSuchMethodError--com.weico.international.activity.WebviewSimpleActivity.loadUrl")
+        } catch (e: ClassNotFoundError) {
+            log("ClassNotFoundError--com.weico.international.activity.WebviewSimpleActivity.loadUrl")
+        }
 
         findAndHookMethod(
             "com.sina.wbs.webkit.WebView",
@@ -254,18 +276,36 @@ class WeiboHook : IXposedHookLoadPackage {
             }
         )
 
-        findAndHookMethod(
-            "com.weico.international.api.RxApiKt", classLoader,
-            "queryUveAdRequest\$lambda-178",
-            findClass("java.util.Map", classLoader),
-            object : XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam) {
-                    log("queryUveAdRequest")
-                    param.result = ""
-                }
+        val queryUveAdRequestHook = object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                log("queryUveAdRequest")
+                param.result = ""
             }
-        )
-
+        }
+        try {
+            findAndHookMethod(
+                "com.weico.international.api.RxApiKt", classLoader,
+                "queryUveAdRequest\$lambda-178",
+                findClass("java.util.Map", classLoader),
+                queryUveAdRequestHook
+            )
+        } catch (e: NoSuchMethodError) {
+            log("NoSuchMethodError--com.weico.international.api.RxApiKt.queryUveAdRequest\$lambda-178")
+        } catch (e: ClassNotFoundError) {
+            log("ClassNotFoundError--com.weico.international.api.RxApiKt.queryUveAdRequest\$lambda-178")
+        }
+        try {
+            findAndHookMethod(
+                "com.weico.international.api.RxApiKt", classLoader,
+                "queryUveAdRequest\$lambda-153",
+                findClass("java.util.Map", classLoader),
+                queryUveAdRequestHook
+            )
+        } catch (e: NoSuchMethodError) {
+            log("NoSuchMethodError--com.weico.international.api.RxApiKt.queryUveAdRequest\$lambda-178")
+        } catch (e: ClassNotFoundError) {
+            log("ClassNotFoundError--com.weico.international.api.RxApiKt.queryUveAdRequest\$lambda-178")
+        }
         findAndHookMethod(
             "com.weico.international.video.AbsPlayer", classLoader,
             "setUp",
@@ -289,6 +329,26 @@ class WeiboHook : IXposedHookLoadPackage {
                 }
             }
         )
+
+        try {
+            findAndHookMethod("com.sina.push.service.PushAlarmManager", classLoader,
+                "a",
+                Int::class.java,
+                Long::class.java,
+                Long::class.java,
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        log("com.sina.push.service.PushAlarmManager#a(int, long, long)")
+                        param.result = null
+                    }
+                }
+            )
+        } catch (e: NoSuchMethodError) {
+            log("NoSuchMethodError--com.sina.push.service.PushAlarmManager#a(int, long, long)")
+        } catch (e: ClassNotFoundError) {
+            log("ClassNotFoundError--com.sina.push.service.PushAlarmManager#a(int, long, long)")
+        }
+
     }
 
     private fun log(log: String) {
