@@ -331,7 +331,24 @@ class WeiboHook : IXposedHookLoadPackage {
         )
 
         try {
-            findAndHookMethod("com.sina.push.service.PushAlarmManager", classLoader,
+            findAndHookMethod("com.weico.international.model.weico.Account", classLoader,
+                "isVip",
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        log("com.weico.international.model.weico.Account#isVip")
+                        param.result = true
+                    }
+                }
+            )
+        } catch (e: NoSuchMethodError) {
+            log("NoSuchMethodError--com.weico.international.model.weico.Account#isVip")
+        } catch (e: ClassNotFoundError) {
+            log("ClassNotFoundError--com.weico.international.model.weico.Account#isVip")
+        }
+
+        try {
+            findAndHookMethod(
+                "com.sina.push.service.PushAlarmManager", classLoader,
                 "a",
                 Int::class.java,
                 Long::class.java,
