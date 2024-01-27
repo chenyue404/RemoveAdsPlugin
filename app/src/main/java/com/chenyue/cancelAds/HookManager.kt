@@ -23,7 +23,6 @@ object HookManager {
             arrayListOf(
                 WeiboHook(),
                 SelfHook(),
-                JdjrHook(),
                 CoolApkHook(),
                 FeimaoHook()
             )
