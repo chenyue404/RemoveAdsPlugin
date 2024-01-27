@@ -37,6 +37,7 @@ android {
             signingConfig signingConfigs.my
         }
     }
+    namespace 'com.chenyue.cancelAds'
 }
 
 dependencies {
