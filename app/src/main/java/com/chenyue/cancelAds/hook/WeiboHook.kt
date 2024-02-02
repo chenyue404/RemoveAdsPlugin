@@ -20,6 +20,7 @@ import de.robv.android.xposed.XposedHelpers.setFloatField
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import java.net.URLDecoder
 
+
 /**
  * Created by chenyue404
  */
@@ -361,6 +362,20 @@ class WeiboHook : IXposedHookLoadPackage {
                     }
                 })
         }
+
+        tryHook("com.weico.international.ui.discoverytrend.ui.DiscoveryTrendHeader#setData") {
+            findAndHookMethod("com.weico.international.ui.discoverytrend.ui.DiscoveryTrendHeader",
+                classLoader,
+                "setData",
+                findClass("com.weico.international.flux.model.DiscoveryTrendsEntry", classLoader),
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        log("com.weico.international.ui.discoverytrend.ui.DiscoveryTrendHeader#setData")
+                        param.result = false
+                    }
+                })
+        }
+
 
         tryHook("com.sina.push.service.PushAlarmManager#a") {
             findAndHookMethod(
