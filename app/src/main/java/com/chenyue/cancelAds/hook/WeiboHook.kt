@@ -368,10 +368,10 @@ class WeiboHook : IXposedHookLoadPackage {
                 classLoader,
                 "setData",
                 findClass("com.weico.international.flux.model.DiscoveryTrendsEntry", classLoader),
-                object : XC_MethodHook() {
-                    override fun beforeHookedMethod(param: MethodHookParam) {
+                object : XC_MethodReplacement() {
+                    override fun replaceHookedMethod(param: MethodHookParam): Any {
                         log("com.weico.international.ui.discoverytrend.ui.DiscoveryTrendHeader#setData")
-                        param.result = false
+                        return true
                     }
                 })
         }
